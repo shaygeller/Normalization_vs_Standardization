@@ -25,8 +25,8 @@ hypertuned_experiment = False
 
 if __name__ == '__main__':
 
-    parsers = [SonarParser, WeatherAUSParser, BandAdditionalParser, IncomeEvaluationParser, SkyserverParser]
-    # parsers = [BandAdditionalParser]
+    # parsers = [SonarParser, WeatherAUSParser, BandAdditionalParser, IncomeEvaluationParser, SkyserverParser]
+    parsers = [WeatherAUSParser]
 
     for parser_class in parsers:
 

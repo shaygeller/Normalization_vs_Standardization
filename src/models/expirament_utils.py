@@ -103,7 +103,7 @@ def create_pipelines(seed):
               ('KNN', KNeighborsClassifier()),
               ('CART', DecisionTreeClassifier(random_state=seed)),
               ('NB', GaussianNB()),
-              ('SVM', SVC(random_state=seed)),
+              ('SVM', SVC(random_state=seed, probability=True)),
               ('RF', RandomForestClassifier(max_depth=3, random_state=seed)),
               ('MLP', MLPClassifier(random_state=seed))
               ]
