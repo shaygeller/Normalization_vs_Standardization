@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
+from sklearn import preprocessing
 
 
 class BandAdditionalParser(object):
@@ -13,7 +14,9 @@ class BandAdditionalParser(object):
         self.label_col = "y"
         self.X, self.y = self._parse_file()
         self.all = pd.concat([self.X, self.y], axis=1)
+        self.metric = "roc_auc"
         self._print_stats()
+        self._convert_y_to_categorical()
 
     def _parse_file(self,):
         """
@@ -36,6 +39,12 @@ class BandAdditionalParser(object):
     def save_to_csv(self):
         save_path = os.path.join("..", "..", "data", "interim", self.file_name)
         self.all.to_csv(save_path, index=False)
+
+    def _convert_y_to_categorical(self):
+        encoder = preprocessing.LabelEncoder()
+        encoder.fit(self.y)
+        transformed = encoder.transform(self.y)
+        self.y = pd.Series(transformed)
 
     def _print_stats(self):
         print("#"*30 + " Start Dataset - " + self.name + " Stats " + "#"*30)

@@ -13,6 +13,7 @@ class SonarParser(object):
         self.label_col = "60"
         self.X, self.y = self._parse_file()
         self.all = pd.concat([self.X, self.y], axis=1)
+        self.metric = "accuracy"
         self._print_stats()
 
     def _parse_file(self,):

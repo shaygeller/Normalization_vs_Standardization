@@ -8,6 +8,7 @@ from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.model_selection import GridSearchCV, KFold
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
@@ -113,7 +114,7 @@ def create_pipelines(seed):
                ('QuantileTransformer-Normal', QuantileTransformer(output_distribution='normal')),
                ('QuantileTransformer-Uniform', QuantileTransformer(output_distribution='uniform')),
                ('PowerTransformer-Yeo-Johnson', PowerTransformer(method='yeo-johnson')),
-               # ('Normalizer', Normalizer())
+               ('Normalizer', Normalizer())
                ]
     additions = [('PCA', PCA(n_components=4)),
                  ]
@@ -186,7 +187,12 @@ def run_cv_and_test(X_train, y_train, X_test, y_test, pipelines, scoring, seed, 
 
         # fit on train and predict on test
         model.fit(X_train, y_train)
-        curr_test_score = model.score(X_test, y_test)
+        if scoring == "accuracy":
+            curr_test_score = model.score(X_test, y_test)
+        elif scoring == "roc_auc":
+            y_pred = model.predict_proba(X_test)[:, 1]
+            curr_test_score = roc_auc_score(y_test, y_pred)
+
         test_scores.append(curr_test_score)
 
         # Add separation line if different classifier applied
@@ -197,14 +203,14 @@ def run_cv_and_test(X_train, y_train, X_test, y_test, pipelines, scoring, seed, 
                         "Classifier_Name": name,
                         "CV_mean": cv_results.mean(),
                         "CV_std": cv_results.std(),
-                        "Test_acc": curr_test_score
+                        "Test_score": curr_test_score
                         }
         rows_list.append(results_dict)
 
     print_results(names, results, test_scores)
 
     df = pd.DataFrame(rows_list)
-    return df[["Dataset", "Classifier_Name", "CV_mean", "CV_std", "Test_acc"]]
+    return df[["Dataset", "Classifier_Name", "CV_mean", "CV_std", "Test_score"]]
 
 
 def run_cv_and_test_hypertuned_params(X_train, y_train, X_test, y_test, pipelines, scoring, seed, num_folds,
@@ -259,7 +265,12 @@ def run_cv_and_test_hypertuned_params(X_train, y_train, X_test, y_test, pipeline
 
         # fit on train and predict on test
         model.fit(X_train, y_train)
-        curr_test_score = model.score(X_test, y_test)
+        if scoring is "accuracy":
+            curr_test_score = model.score(X_test, y_test)
+        elif scoring is "roc_auc":
+            y_pred = model.predict(X_test)
+            curr_test_score = accuracy_score(y_test, y_pred)
+
         test_scores.append(curr_test_score)
 
         # Add separation line if different classifier applied
@@ -270,14 +281,14 @@ def run_cv_and_test_hypertuned_params(X_train, y_train, X_test, y_test, pipeline
                         "Classifier_Name": name,
                         "CV_mean": cv_results.mean(),
                         "CV_std": cv_results.std(),
-                        "Test_acc": curr_test_score
+                        "Test_score": curr_test_score
                         }
         rows_list.append(results_dict)
 
     print_results(names, results, test_scores)
 
     df = pd.DataFrame(rows_list)
-    return df[["Dataset", "Classifier_Name", "CV_mean", "CV_std", "Test_acc"]]
+    return df[["Dataset", "Classifier_Name", "CV_mean", "CV_std", "Test_score"]]
 
 
 def check_seperation_line(name, prev_clf_name, rows_list):
