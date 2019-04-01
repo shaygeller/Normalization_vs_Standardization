@@ -27,11 +27,10 @@ class GesturesParser(object):
         print(X.shape, y.shape)
         X, y = shuffle(X, y, random_state=0)
         self.X, self.y = X, y
-        self.all = pd.concat([X, y], axis=1)
         self._train_X, self._test_X, self._train_y, self._test_y = train_test_split(X, y)
 
     def _parse_file(self, file_path):
-        data = pd.read_csv(file_path, header=None, names=list(range(0, 64)) +["Label"])
+        data = pd.read_csv(file_path, header=None, names=list(range(0, 65)))
 
         X = data.iloc[:,:-1]
         y = data.iloc[:,-1]
@@ -46,11 +45,10 @@ class GesturesParser(object):
 
     def save_to_csv(self):
         dir_path = os.path.join("..","..","data","interim")
-        self.all.to_csv(os.path.join(dir_path, __class__.__name__+'.csv'), index=False)
+        self.X(os.path.join(dir_path, __class__.__name__+'.csv'))
 
 
 
 parser = GesturesParser()
 parser.parse_train_set()
 X, y = parser._train_X, parser._train_y
-parser.save_to_csv()

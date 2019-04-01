@@ -96,7 +96,8 @@ def print_results2(names, results_mean, results_std, test_scores):
 
 
 def create_pipelines(seed):
-    models = [('LR', LogisticRegression()),
+    models = [
+                ('LR', LogisticRegression()),
               ('LDA', LinearDiscriminantAnalysis()),
               ('KNN', KNeighborsClassifier()),
               ('CART', DecisionTreeClassifier(random_state=seed)),
@@ -357,12 +358,31 @@ def get_hypertune_params():
                   'MLP__alpha': alpha,
                   'MLP__learning_rate': learning_rate,
                   }
+
+    # DecisionTreeClassifier PARAMS
+    criterion = ['gini', 'entropy']
+    splitter = ['best', 'random']
+    max_depth = [int(x) for x in np.linspace(10, 110, num=11)]
+    max_depth.append(None)
+    min_samples_split = [2, 5, 10]
+    min_samples_leaf = [1, 2, 4]
+    max_features = ["auto", "sqrt", "log2"]
+    cart_params = {'CART__criterion': criterion,
+                   'CART__splitter': splitter,
+                   'CART__max_depth': max_depth,
+                   'CART__min_samples_split': min_samples_split,
+                   'CART__min_samples_leaf': min_samples_leaf,
+                   'CART__max_features': max_features
+                   }
+
     hypertuned_params = {"RF": rf_params,
                          "LDA": lda_params,
                          "MLP": mlp_params,
-                         "SMV": svm_params,
+                         "SVM": svm_params,
                          "LR": lr_params,
-                         "KNN": knn_params
+                         "KNN": knn_params,
+                         "CART": cart_params,
                          }
 
     return hypertuned_params
+
