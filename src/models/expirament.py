@@ -18,15 +18,13 @@ from src.models.expirament_utils import create_pipelines, run_cv_and_test, get_h
 # Global_vars
 seed = 1234
 num_folds = 10
-# scoring = 'accuracy'
 n_jobs = -1
-hypertuned_experiment = False
+hypertuned_experiment = True
 
 
 if __name__ == '__main__':
 
-    # parsers = [SonarParser, WeatherAUSParser, BandAdditionalParser, IncomeEvaluationParser, SkyserverParser]
-    parsers = [WeatherAUSParser]
+    parsers = [SonarParser, WeatherAUSParser, BandAdditionalParser, IncomeEvaluationParser, SkyserverParser]
 
     for parser_class in parsers:
 
@@ -63,6 +61,6 @@ if __name__ == '__main__':
             hypertune_results_df = run_cv_and_test_hypertuned_params(X_train, y_train, X_test, y_test, pipelines, scoring, seed,
                                                                      num_folds, dataset_name=parser.name, n_jobs=n_jobs,
                                                                      hypertuned_params=hypertuned_params,)
-            dataset_results_name = parser.name + "_results_hypertune.csv"
+            dataset_results_name = parser.name + "_results_hypertuned.csv"
             results_path = os.path.join("..", "..", "data", "processed", dataset_results_name)
             hypertune_results_df.to_csv(results_path, index=False)
