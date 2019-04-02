@@ -65,38 +65,14 @@ def print_results(names, results, test_scores):
             print(Color.END + msg)
 
 
-def print_results2(names, results_mean, results_std, test_scores):
-    print()
-    print("#" * 30 + "Results" + "#" * 30)
+def create_pipelines(seed, verbose=1):
+    """
+         Creates a list of pipelines with preprocessing(PCA), models and scalers.
 
-    class Color:
-        PURPLE = '\033[95m'
-        CYAN = '\033[96m'
-        DARKCYAN = '\033[36m'
-        BLUE = '\033[94m'
-        GREEN = '\033[92m'
-        YELLOW = '\033[93m'
-        RED = '\033[91m'
-        BOLD = '\033[1m'
-        UNDERLINE = '\033[4m'
-        END = '\033[0m'
+    :param seed: Random seed for models who needs it
+    :return:
+    """
 
-    # print max row in BOLD
-    prev_clf_name = names[0].split("_")[1]
-    for name, mean, std, score in zip(names, results_mean, results_std, test_scores):
-        clf_name = name.split("_")[1]
-        if prev_clf_name != clf_name:
-            print()
-            prev_clf_name = clf_name
-
-        msg = "%s: %f (%f) [test_score:%.3f]" % (name, mean, std, score)
-        if mean == max(results_mean):
-            print(Color.BOLD + msg)
-        else:
-            print(Color.END + msg)
-
-
-def create_pipelines(seed):
     models = [
                 ('LR', LogisticRegression()),
               ('LDA', LinearDiscriminantAnalysis()),
@@ -142,9 +118,10 @@ def create_pipelines(seed):
                 model_name = scalar[0] + "_" + model[0] + "-" + addition[0]
                 pipelines.append((model_name, Pipeline([scalar, addition, model])))
 
-    print("Created these pipelines:")
-    for pipe in pipelines:
-        print(pipe[0])
+    if verbose:
+        print("Created these pipelines:")
+        for pipe in pipelines:
+            print(pipe[0])
 
     return pipelines
 
@@ -156,15 +133,6 @@ def run_cv_and_test(X_train, y_train, X_test, y_test, pipelines, scoring, seed, 
         Iterate over the pipelines, calculate CV mean and std scores, fit on train and predict on test.
         Return the results in a dataframe
 
-    :param X_train:
-    :param y_train:
-    :param X_test:
-    :param y_test:
-    :param scoring:
-    :param seed:
-    :param num_folds:
-    :param dataset_name:
-    :return:
     """
 
     # List that contains the rows for a dataframe
@@ -182,6 +150,8 @@ def run_cv_and_test(X_train, y_train, X_test, y_test, pipelines, scoring, seed, 
         cv_results = model_selection.cross_val_score(model, X_train, y_train, cv=kfold, n_jobs=n_jobs, scoring=scoring)
         results.append(cv_results)
         names.append(name)
+
+        # Print CV results of the best CV classier
         msg = "%s: %f (%f)" % (name, cv_results.mean(), cv_results.std())
         print(msg)
 
@@ -246,6 +216,8 @@ def run_cv_and_test_hypertuned_params(X_train, y_train, X_test, y_test, pipeline
     # To be used in outer CV (you asked for num_folds)
     outer_cv = KFold(n_splits=num_folds, shuffle=True, random_state=seed)
     for name, model in pipelines:
+
+        # Get model's hyper parameters
         model_name = name.split("_")[1]
         if "-" in model_name:
             model_name = model_name.split("-")[0]
@@ -255,11 +227,14 @@ def run_cv_and_test_hypertuned_params(X_train, y_train, X_test, y_test, pipeline
         else:
             continue
 
+        # Train nested-CV
         clf = GridSearchCV(estimator=model, param_grid=random_grid, cv=inner_cv, scoring=scoring,
                            verbose=2, n_jobs=n_jobs, refit=True)
         cv_results = model_selection.cross_val_score(clf, X_train, y_train, cv=outer_cv, n_jobs=n_jobs, scoring=scoring)
         results.append(cv_results)
         names.append(name)
+
+        # Print CV results of the best CV classier
         msg = "%s: %f (%f)" % (name, cv_results.mean(), cv_results.std())
         print(msg)
 
@@ -292,7 +267,11 @@ def run_cv_and_test_hypertuned_params(X_train, y_train, X_test, y_test, pipeline
 
 
 def check_seperation_line(name, prev_clf_name, rows_list):
-    # Add empty row if different classifier ending
+    """
+        Add empty row if different classifier ending
+
+    """
+
     clf_name = name.split("_")[1]
     if prev_clf_name != clf_name:
         empty_dict = {"Dataset": "",
@@ -307,6 +286,12 @@ def check_seperation_line(name, prev_clf_name, rows_list):
 
 
 def get_hypertune_params():
+    """
+
+        Create a dictionary with classifier name as a key and it's hyper parameters options as a value
+
+    :return:
+    """
     # RF PARAMS
     n_estimators = [int(x) for x in np.linspace(start=3, stop=20, num=3)]
     max_features = ['auto', 'sqrt']
