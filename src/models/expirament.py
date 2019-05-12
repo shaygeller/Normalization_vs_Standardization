@@ -19,7 +19,8 @@ from src.models.expirament_utils import create_pipelines, run_cv_and_test, get_h
 seed = 1234
 num_folds = 10
 n_jobs = -1
-hypertuned_experiment = True
+hypertuned_experiment = False
+is_save_results = False
 
 
 if __name__ == '__main__':
@@ -36,7 +37,6 @@ if __name__ == '__main__':
 
         X, y = parser.X, parser.y
 
-
         y_sonar = column_or_1d(y, warn=False)
         X_train, X_test, y_train, y_test = train_test_split(X, y_sonar, test_size=0.20, random_state=seed)
 
@@ -48,9 +48,10 @@ if __name__ == '__main__':
                                      dataset_name=parser.name, n_jobs=n_jobs)
 
         # Save cv experiment to csv
-        dataset_results_name = parser.name + "_results.csv"
-        results_path = os.path.join("..", "..", "data", "processed", dataset_results_name)
-        results_df.to_csv(results_path, index=False)
+        if is_save_results:
+            dataset_results_name = parser.name + "_results.csv"
+            results_path = os.path.join("..", "..", "data", "processed", dataset_results_name)
+            results_df.to_csv(results_path, index=False)
 
 
         if hypertuned_experiment:
@@ -61,6 +62,8 @@ if __name__ == '__main__':
             hypertune_results_df = run_cv_and_test_hypertuned_params(X_train, y_train, X_test, y_test, pipelines, scoring, seed,
                                                                      num_folds, dataset_name=parser.name, n_jobs=n_jobs,
                                                                      hypertuned_params=hypertuned_params,)
-            dataset_results_name = parser.name + "_results_hypertuned.csv"
-            results_path = os.path.join("..", "..", "data", "processed", dataset_results_name)
-            hypertune_results_df.to_csv(results_path, index=False)
+
+            if is_save_results:
+                dataset_results_name = parser.name + "_results_hypertuned.csv"
+                results_path = os.path.join("..", "..", "data", "processed", dataset_results_name)
+                hypertune_results_df.to_csv(results_path, index=False)
