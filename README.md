@@ -3,8 +3,6 @@ Normalization_vs_Standartization
 
 Code that produce the results for my article "Normalization vs Standardization — Quantitative analysis" - https://towardsdatascience.com/normalization-vs-standardization-quantitative-analysis-a91e8a79cebf
 
-Check the difference between Normalization and Standartization methods
-
 Project Organization
 ------------
 
